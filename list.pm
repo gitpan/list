@@ -1,5 +1,5 @@
 package list;
-$VERSION = 1.0;
+$VERSION = '1.0.1';
 
 bootstrap xsub;
 
@@ -61,22 +61,22 @@ sub rotate {
 
 sub all(@) {
   $_ or return $_ for @_;
-  true
+  1
 }
 
 sub alldef(@) {
   defined $_ or return undef for @_;
-  true
+  1
 }
 
 sub any(@) {
   $_ and return $_ for @_;
-  false
+  ''
 }
 
 sub anydef(@) {
   defined $_ and return $_ for @_;
-  false
+  ''
 }
 
 sub min(@) : lvalue {
@@ -140,13 +140,6 @@ sub median(@) {
   $x[@x / 2]
 }
 
-sub factorial($) {
-  my $n = shift;
-  my $x = 1;
-  $x *= $n-- while $n > 1;
-  $x
-}
-
 sub phash(@) {
   my @ph = (\my %ph);
   while (@_) {
@@ -193,38 +186,11 @@ sub rfold(&@) {
   }
 }
 
-sub mapiter(&@) {
-  my $f = shift;
-  my @r;
-  while (my $i = shift) {
-    while (defined(local $_ = <$i>)) {
-      push @r, &$f();
-    }
-  }
-  @r
-}
-
 sub map2(&@) {
   my $f = shift;
   my @r;
   while (my ($k, $v) = splice(@_, 0, 2)) {
     push @r, $f->($k, $v);
-  }
-  @r
-}
-
-sub mapi(&@) {
-  my $f = shift;
-  local $. = -1;
-  map { ++$.; &$f() } @_
-}
-
-sub map2i(&@) {
-  my $f = shift;
-  my @r;
-  local $. = -1;
-  while (my ($k, $v) = splice(@_, 0, 2)) {
-    ++$.; push @r, $f->($k, $v);
   }
   @r
 }
@@ -237,17 +203,6 @@ sub mapkv(&\%) {
     push @r, $f->(@kv);
   }
 
-  @r
-}
-
-sub grepiter(&@) {
-  my $f = shift;
-  my @r;
-  while (my $i = shift) {
-    while (defined(local $_ = <$i>)) {
-      &$f() and push @r, $_
-    }
-  }
   @r
 }
 
@@ -264,29 +219,9 @@ sub grep2(&@) {
   @r
 }
 
-sub grepi(&@) {
-  my $f = shift;
-  local $. = -1;
-  grep { ++$.; &$f() } @_
-}
-
-sub grep2i(&@) {
-  my $f = shift; my @r; local $. = -1;
-  while (my ($l, $r) = splice(@_, 0, 2)) {
-    ++$.; $f->($l, $r) and push @r, $l => $r;
-  }
-  @r
-}
-
 sub factor(&@) {
   my $f = shift; my %h; local $. = 0;
   push(@{$h{&$f}}, $_), ++$. for @_;
-  @h{sort keys %h}
-}
-
-sub factorln(&@) {
-  my $f = shift; my %h; local $. = 0;
-  pushln(@{$h{&$f}}, $_), ++$. for @_;
   @h{sort keys %h}
 }
 
@@ -323,18 +258,6 @@ sub zip {
     @kv
   } else {
     pushln(@kv, $$k[$_], $$v[$_]) for 0 .. $m;
-    \@kv
-  }
-}
-
-sub zipi(@) {
-  my $k = shift; my @kv; local $. = -1;
-
-  if (wantarray) {
-    push(@kv, $_, ++$.) for @$k;
-    @kv
-  } else {
-    pushln(@kv, $_, ++$.) for @$k;
     \@kv
   }
 }
